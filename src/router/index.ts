@@ -1,11 +1,14 @@
-import VueRouter from "vue-router";
+import { createRouter, createWebHashHistory } from "vue-router";
 import NProgress from "nprogress";
 import "nprogress/nprogress.css";
 
-const routes = [{ path: "/", component: () => import("@/views/login.vue") }];
+const routes = [
+  { path: "/", component: () => import("@/views/login.vue") },
+  { path: "/seating", component: () => import("@/views/seating.vue") },
+];
 
-const router = VueRouter.createRouter({
-  history: VueRouter.createWebHashHistory(),
+const router = createRouter({
+  history: createWebHashHistory(),
   routes,
 });
 

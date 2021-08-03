@@ -6,3 +6,8 @@ declare module "*.vue" {
 }
 
 declare module "nprogress";
+
+interface IStudent {
+  name: string;
+  height: number;
+}
