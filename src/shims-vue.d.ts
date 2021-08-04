@@ -4,10 +4,13 @@ declare module "*.vue" {
   const component: DefineComponent<{}, {}, any>;
   export default component;
 }
-
 declare module "nprogress";
 
 interface IStudent {
   name: string;
   height: number;
+}
+interface IInfo {
+  className: string;
+  students: Array<IStudent>;
 }

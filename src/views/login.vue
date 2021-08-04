@@ -105,7 +105,7 @@ export default defineComponent({
         for (let sheet in workBook.Sheets) {
           if (workBook.Sheets.hasOwnProperty(sheet)) {
             fromTo = workBook.Sheets[sheet]["!ref"];
-            console.log(fromTo,"fromTo");
+            console.log(fromTo, "fromTo");
             info.students = XLSX.utils.sheet_to_json(workBook.Sheets[sheet]);
             break; // 如果只取第一张表，就取消注释这行
           }
@@ -119,9 +119,10 @@ export default defineComponent({
 
     //点击了确认-》let's go
     const toEdit = () => {
-      (<Function>importInfo)(info.className,info.students);
+      (<Function>importInfo)(info.className, info.students);
       $router.push("/seating");
-      console.log(info,'login页面的info');
+      sessionStorage.setItem("info", JSON.stringify(info));
+      console.log(info, "login页面的info");
     };
     return {
       classInputFocus,
