@@ -36,10 +36,16 @@
       </div>
     </div>
     <div class="flex-grow h-screen flex flex-col items-center">
-      <div class="flex-grow self-stretch p-5">
-        <div class="table-row" v-for="item in tableRows" :key="item">
+      <div
+        class="flex-grow self-stretch p-5"
+        @dragenter="dragenter"
+        @dragleave="dragleave"
+      >
+        <div class="table-row" v-for="(item, index) in tableRows" :key="item">
           <div class="table-pair">
-            <span></span>
+            <span @drop="drop($event, index + 1, 1)" @dragover="dragover">{{
+              formatter(seatData[index + 1 + "_" + 1])
+            }}</span>
             <span></span>
           </div>
           <div class="table-pair">
@@ -76,7 +82,7 @@
           h-16
           bg-gray-700
           rounded
-           p-3
+          p-3
           leading-10
           my-4
           text-center text-white
@@ -90,6 +96,7 @@
       <ul class="overflow-y-auto students-ul">
         <li
           draggable="true"
+          @dragstart="dragstart($event, item, index)"
           v-for="(item, index) in info.students"
           :key="index"
           class="
@@ -139,12 +146,58 @@ export default defineComponent({
       let isInt = rows / 1 === 0;
       return Math.floor(info.students.length / 8) + (isInt ? 2 : 1);
     });
-    const log = (e: any, text?: any) => {
-      nextTick(() => {
-        console.log(e, text);
-      });
+
+    let seatData: any = reactive({});
+    const dragstart = (e: DragEvent, data: IStudent, index: number) => {
+      console.log(data, "data");
+      e.dataTransfer?.setData("student", JSON.stringify(data));
+      e.dataTransfer?.setData("index", index.toString());
     };
-    return { info, log, seatCfg, tableRows };
+    const dragenter = (e: any) => {
+      if (e.target?.nodeName == "SPAN") {
+        e.target.style.background = "rgba(236, 72, 153, 0.2)";
+      }
+    };
+    const dragleave = (e: any) => {
+      if (e.target?.nodeName == "SPAN") {
+        (e.target as HTMLSpanElement).style.background = "transparent";
+      }
+    };
+    const drop = (e: DragEvent, row: number, column: number) => {
+      e.preventDefault();
+      (e.target as HTMLSpanElement).style.background = "transparent";
+      seatData[row + "_" + column] = JSON.parse(
+        (<DataTransfer>e.dataTransfer).getData("student")
+      );
+      info.students.splice(+(<DataTransfer>e.dataTransfer).getData("index"), 1);
+      console.log(row, column);
+      console.log(seatData);
+    };
+    const dragover = (e: DragEvent) => {
+      e.preventDefault();
+    };
+
+    const formatter = (e: IStudent) => {
+      if (e) {
+        return e.name + " " + e.height;
+      }
+    };
+    const log = (e: any, text?: any) => {
+      console.log(e, text);
+    };
+    return {
+      info,
+      log,
+      seatCfg,
+      tableRows,
+      dragenter,
+      dragleave,
+      drop,
+      dragover,
+      dragstart,
+      seatData,
+      formatter,
+    };
   },
 });
 </script>
@@ -175,9 +228,12 @@ export default defineComponent({
     border: 1px solid #000;
     width: 22%;
     margin-bottom: 16px;
+    display: flex;
     span {
       display: inline-block;
       height: 60px;
+      line-height: 60px;
+      text-align: center;
       width: 50%;
     }
     span:nth-child(1) {
