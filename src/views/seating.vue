@@ -1,7 +1,7 @@
 <template>
   <div class="flex">
     <div class="border-r-2 w-52 cfg-bar bg-purple-50">
-      <!-- <button @click="log(seatCfg)">dddddddddddddddddddd</button> -->
+      <!-- <button @click="log(seatCfg)">用嘀嘀嗒嘀嗒</button> -->
       <p class="cfg-title">座位设计</p>
       <div class="p-3">
         <p class="mb-2">怎么看呢？</p>
@@ -13,7 +13,7 @@
             >学生视图</el-radio-button
           >
         </el-radio-group>
-        <p class="mb-2">分几组呢？</p>
+        <!-- <p class="mb-2">分几组呢？</p>
         <el-input-number
           class="mb-3"
           v-model="seatCfg.group"
@@ -26,7 +26,7 @@
           v-model="seatCfg.column"
           :min="1"
           :max="4"
-        />
+        /> -->
         <p class="mb-2">展示身高</p>
         <el-switch
           v-model="seatCfg.hideHeight"
@@ -36,7 +36,26 @@
       </div>
     </div>
     <div class="flex-grow h-screen flex flex-col items-center">
-      <div class="flex-grow">学生座位分布区</div>
+      <div class="flex-grow self-stretch p-5">
+        <div class="table-row" v-for="item in tableRows" :key="item">
+          <div class="table-pair">
+            <span></span>
+            <span></span>
+          </div>
+          <div class="table-pair">
+            <span></span>
+            <span></span>
+          </div>
+          <div class="table-pair">
+            <span></span>
+            <span></span>
+          </div>
+          <div class="table-pair">
+            <span></span>
+            <span></span>
+          </div>
+        </div>
+      </div>
       <div
         class="
           w-52
@@ -51,7 +70,18 @@
       >
         讲台
       </div>
-      <div class=" w-64 h-10 bg-gray-700 rounded leading-10 my-4 text-center text-white">
+      <div
+        class="
+          w-2/5
+          h-16
+          bg-gray-700
+          rounded
+           p-3
+          leading-10
+          my-4
+          text-center text-white
+        "
+      >
         {{ info?.className }}座位表
       </div>
     </div>
@@ -59,7 +89,8 @@
       <p class="cfg-title">学生列表</p>
       <ul class="overflow-y-auto students-ul">
         <li
-          v-for="(item, index) in info?.students"
+          draggable="true"
+          v-for="(item, index) in info.students"
           :key="index"
           class="
             flex
@@ -84,35 +115,47 @@
   </div>
 </template>
 <script lang="ts">
-import { defineComponent, inject, nextTick, onMounted, reactive } from "vue";
+import {
+  computed,
+  defineComponent,
+  inject,
+  nextTick,
+  onMounted,
+  reactive,
+} from "vue";
 
 export default defineComponent({
   setup() {
-    let info = inject<IInfo>("info");
+    let info = inject("info") as IInfo;
     let seatCfg = reactive({
       visual: "teacher",
-      group: 4,
-      column: 2,
+      // group: 4,
+      // column: 2,
       hideHeight: true,
     });
 
+    let tableRows = computed(() => {
+      let rows = info.students.length / 8;
+      let isInt = rows / 1 === 0;
+      return Math.floor(info.students.length / 8) + (isInt ? 2 : 1);
+    });
     const log = (e: any, text?: any) => {
       nextTick(() => {
         console.log(e, text);
       });
     };
-    return { info, log, seatCfg };
+    return { info, log, seatCfg, tableRows };
   },
 });
 </script>
-<style>
+<style scoped>
 .cfg-bar {
   @apply h-screen border-gray-300;
 }
 .cfg-title {
   @apply text-center text-xl text-white font-semibold leading-6 py-3 bg-gradient-to-r from-pink-300 to-purple-400;
 }
-.el-text-base .el-radio-button__inner {
+.el-text-base :deep(.el-radio-button__inner) {
   font-size: 14px;
 }
 .bg-table {
@@ -123,5 +166,23 @@ export default defineComponent({
 }
 .students-ul li:nth-child(1) {
   margin-top: 8px;
+}
+.table-row {
+  display: flex;
+  justify-content: space-between;
+  .table-pair {
+    height: 61px;
+    border: 1px solid #000;
+    width: 22%;
+    margin-bottom: 16px;
+    span {
+      display: inline-block;
+      height: 60px;
+      width: 50%;
+    }
+    span:nth-child(1) {
+      border-right: 1px solid #000;
+    }
+  }
 }
 </style>

@@ -6,6 +6,8 @@ import {
   ElRadioGroup,
   ElInputNumber,
   ElSwitch,
+  ElRow,
+  ElCol
 } from "element-plus";
 
 const elementComponents = [
@@ -15,6 +17,8 @@ const elementComponents = [
   ElRadioGroup,
   ElInputNumber,
   ElSwitch,
+  ElRow,
+  ElCol
 ];
 export default function importElementUi(app:App<Element>) {
   //设置中文，默认饿了么组件的大小为small
