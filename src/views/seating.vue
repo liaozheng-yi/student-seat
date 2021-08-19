@@ -5,7 +5,11 @@
       <p class="cfg-title">座位设计</p>
       <div class="p-3">
         <p class="mb-2">怎么看呢？</p>
-        <el-radio-group v-model="seatCfg.visual" class="mb-3">
+        <el-radio-group
+          v-model="seatCfg.visual"
+          class="mb-3"
+          @change="visualChange"
+        >
           <el-radio-button label="teacher" class="el-text-base"
             >教师视图</el-radio-button
           >
@@ -29,36 +33,46 @@
         /> -->
         <p class="mb-2">展示身高</p>
         <el-switch
-          v-model="seatCfg.hideHeight"
+          v-model="seatCfg.showHeight"
           active-text="看一下"
           inactive-text="隐藏起来"
         ></el-switch>
       </div>
     </div>
-    <div class="flex-grow h-screen flex flex-col items-center">
+    <div
+      class="flex-grow h-screen flex items-center flex-col"
+      :class="{ 'rotate-180 transform': seatCfg.visual == 'teacher' }"
+    >
       <div
         class="flex-grow self-stretch p-5"
         @dragenter="dragenter"
         @dragleave="dragleave"
+        @dragover="dragover"
       >
         <div class="table-row" v-for="(item, index) in tableRows" :key="item">
-          <div class="table-pair">
-            <span @drop="drop($event, index + 1, 1)" @dragover="dragover">{{
-              formatter(seatData[index + 1 + "_" + 1])
-            }}</span>
-            <span></span>
-          </div>
-          <div class="table-pair">
-            <span></span>
-            <span></span>
-          </div>
-          <div class="table-pair">
-            <span></span>
-            <span></span>
-          </div>
-          <div class="table-pair">
-            <span></span>
-            <span></span>
+          <div class="table-pair" v-for="num in 4" :key="num">
+            <!-- 
+              1 1 2
+              2 3 4
+              3 5 6
+              4 7 8
+             -->
+            <span
+              draggable="true"
+              @dragstart="exchange($event, index + 1, num * 2 - 1)"
+              @drop="drop($event, index + 1, num * 2 - 1)"
+              @dblclick="remove(index + 1, num * 2 - 1)"
+              :class="{ 'rotate-180 transform': seatCfg.visual == 'teacher' }"
+              >{{ formatter(seatData[index + 1 + "_" + (num * 2 - 1)]) }}</span
+            >
+            <span
+              draggable="true"
+              @dragstart="exchange($event, index + 1, num * 2)"
+              @drop="drop($event, index + 1, num * 2)"
+              @dblclick="remove(index + 1, num * 2)"
+              :class="{ 'rotate-180 transform': seatCfg.visual == 'teacher' }"
+              >{{ formatter(seatData[index + 1 + "_" + num * 2]) }}</span
+            >
           </div>
         </div>
       </div>
@@ -72,7 +86,9 @@
           font-semibold
           text-lg
           leading-8
+          transform
         "
+        :class="{ 'rotate-180 transform': seatCfg.visual == 'teacher' }"
       >
         讲台
       </div>
@@ -86,7 +102,9 @@
           leading-10
           my-4
           text-center text-white
+          transform
         "
+        :class="{ 'rotate-180 transform': seatCfg.visual == 'teacher' }"
       >
         {{ info?.className }}座位表
       </div>
@@ -129,6 +147,7 @@ import {
   nextTick,
   onMounted,
   reactive,
+  ref,
 } from "vue";
 
 export default defineComponent({
@@ -138,18 +157,23 @@ export default defineComponent({
       visual: "teacher",
       // group: 4,
       // column: 2,
-      hideHeight: true,
+      showHeight: true,
     });
+    const visualChange = (e: "teacher" | "student") => {
+      console.log(e);
+      // if(e)
+    };
 
-    let tableRows = computed(() => {
+    //计算座位数目
+    let tableRows = ref(<number>0);
+    onMounted(() => {
       let rows = info.students.length / 8;
       let isInt = rows / 1 === 0;
-      return Math.floor(info.students.length / 8) + (isInt ? 2 : 1);
+      tableRows.value = Math.floor(info.students.length / 8) + (isInt ? 2 : 1);
     });
 
-    let seatData: any = reactive({});
+    let seatData = reactive(<Record<string, IStudent>>{});
     const dragstart = (e: DragEvent, data: IStudent, index: number) => {
-      console.log(data, "data");
       e.dataTransfer?.setData("student", JSON.stringify(data));
       e.dataTransfer?.setData("index", index.toString());
     };
@@ -163,23 +187,56 @@ export default defineComponent({
         (e.target as HTMLSpanElement).style.background = "transparent";
       }
     };
-    const drop = (e: DragEvent, row: number, column: number) => {
-      e.preventDefault();
-      (e.target as HTMLSpanElement).style.background = "transparent";
-      seatData[row + "_" + column] = JSON.parse(
-        (<DataTransfer>e.dataTransfer).getData("student")
-      );
-      info.students.splice(+(<DataTransfer>e.dataTransfer).getData("index"), 1);
-      console.log(row, column);
-      console.log(seatData);
-    };
     const dragover = (e: DragEvent) => {
       e.preventDefault();
     };
-
+    const drop = (e: DragEvent, row: number, column: number) => {
+      e.preventDefault();
+      (e.target as HTMLSpanElement).style.background = "transparent";
+      let oldSeat = e.dataTransfer?.getData("oldSeat");
+      let newSeat = seatData[row + "_" + column];
+      if (oldSeat) {
+        //如果有旧座位，那么就是交换座位
+        seatData[oldSeat] = newSeat;
+        console.log(oldSeat, "oldSeat");
+      } else {
+        //如果没有，那就是添加
+        info.students.splice(
+          +(<DataTransfer>e.dataTransfer).getData("index"),
+          1
+        );
+      }
+      seatData[row + "_" + column] = JSON.parse(
+        (<DataTransfer>e.dataTransfer).getData("student")
+      );
+      console.log(row, column);
+      console.log(seatData);
+    };
+    //移除座位
+    const remove = (row: number, column: number) => {
+      info.students.unshift(seatData[row + "_" + column]);
+      seatData[row + "_" + column] = {
+        name: "",
+        height: "",
+      } as unknown as IStudent;
+    };
+    //交换座位
+    const exchange = (e: DragEvent, row: number, column: number) => {
+      console.log(seatData[row + "_" + column]);
+      e.dataTransfer?.setData(
+        "student",
+        JSON.stringify(seatData[row + "_" + column])
+      );
+      e.dataTransfer?.setData("oldSeat", row + "_" + column);
+    };
+    //转化信息展示
     const formatter = (e: IStudent) => {
       if (e) {
-        return e.name + " " + e.height;
+        if (seatCfg.showHeight) {
+          return e.name + " " + e.height;
+        } else {
+          return e.name;
+        }
       }
     };
     const log = (e: any, text?: any) => {
@@ -197,6 +254,9 @@ export default defineComponent({
       dragstart,
       seatData,
       formatter,
+      remove,
+      exchange,
+      visualChange,
     };
   },
 });
@@ -229,16 +289,23 @@ export default defineComponent({
     width: 22%;
     margin-bottom: 16px;
     display: flex;
+    position: relative;
     span {
       display: inline-block;
+      user-select: none;
       height: 60px;
       line-height: 60px;
       text-align: center;
       width: 50%;
     }
-    span:nth-child(1) {
-      border-right: 1px solid #000;
-    }
+  }
+  .table-pair::before{
+    content: '';
+    width: 1px;
+    height: 60px;
+    background: #000;
+    position: absolute;
+    right: 50%;
   }
 }
 </style>
