@@ -5,7 +5,8 @@ declare module "*.vue" {
   export default component;
 }
 declare module "nprogress";
-
+declare module "dom-to-image";
+declare module "file-saver";
 interface IStudent {
   name: string;
   height: number | "";

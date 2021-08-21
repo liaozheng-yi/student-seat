@@ -36,12 +36,16 @@
           v-model="seatCfg.showHeight"
           active-text="看一下"
           inactive-text="隐藏起来"
+          class="mb-3"
         ></el-switch>
+        <p class="mb-2">点我截图</p>
+        <el-button @click="savePic">保存哟</el-button>
       </div>
     </div>
     <div
       class="flex-grow h-screen flex items-center flex-col justify-center"
       :class="{ 'rotate-180 transform': seatCfg.visual == 'student' }"
+      id="classroom"
     >
       <div
         class="self-stretch p-5"
@@ -149,7 +153,8 @@ import {
   reactive,
   ref,
 } from "vue";
-
+import domtoimage from "dom-to-image";
+import { saveAs } from 'file-saver';
 export default defineComponent({
   setup() {
     let info = inject("info") as IInfo;
@@ -229,6 +234,7 @@ export default defineComponent({
       );
       e.dataTransfer?.setData("oldSeat", row + "_" + column);
     };
+
     //转化信息展示
     const formatter = (e: IStudent) => {
       if (e) {
@@ -239,6 +245,16 @@ export default defineComponent({
         }
       }
     };
+
+    //保存截图
+    const savePic = () => {
+      domtoimage
+        .toBlob(document.getElementById("classroom"))
+        .then(function (blob: string) {
+          saveAs(blob, `${ info?.className }座位表.jpg`);
+        });
+    };
+
     const log = (e: any, text?: any) => {
       console.log(e, text);
     };
@@ -257,6 +273,7 @@ export default defineComponent({
       remove,
       exchange,
       visualChange,
+      savePic,
     };
   },
 });
@@ -299,8 +316,8 @@ export default defineComponent({
       width: 50%;
     }
   }
-  .table-pair::before{
-    content: '';
+  .table-pair::before {
+    content: "";
     width: 1px;
     height: 60px;
     background: #000;

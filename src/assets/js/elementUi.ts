@@ -1,24 +1,18 @@
 import type { App } from "vue";
 import {
+  ElButton,
   ElInput,
-  ElRadio,
   ElRadioButton,
   ElRadioGroup,
-  ElInputNumber,
   ElSwitch,
-  ElRow,
-  ElCol
 } from "element-plus";
 
 const elementComponents = [
   ElInput,
-  ElRadio,
   ElRadioButton,
   ElRadioGroup,
-  ElInputNumber,
   ElSwitch,
-  ElRow,
-  ElCol
+  ElButton,
 ];
 export default function importElementUi(app:App<Element>) {
   //设置中文，默认饿了么组件的大小为small
