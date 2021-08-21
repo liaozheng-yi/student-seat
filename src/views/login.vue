@@ -107,6 +107,12 @@ export default defineComponent({
             fromTo = workBook.Sheets[sheet]["!ref"];
             console.log(fromTo, "fromTo");
             info.students = XLSX.utils.sheet_to_json(workBook.Sheets[sheet]);
+            info.students = info.students.map((e) => {
+              return {
+                name: e.name,
+                height: e.height || "",
+              };
+            });
             break; // 如果只取第一张表，就取消注释这行
           }
         }

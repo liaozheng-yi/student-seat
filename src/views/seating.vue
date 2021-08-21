@@ -40,11 +40,11 @@
       </div>
     </div>
     <div
-      class="flex-grow h-screen flex items-center flex-col"
-      :class="{ 'rotate-180 transform': seatCfg.visual == 'teacher' }"
+      class="flex-grow h-screen flex items-center flex-col justify-center"
+      :class="{ 'rotate-180 transform': seatCfg.visual == 'student' }"
     >
       <div
-        class="flex-grow self-stretch p-5"
+        class="self-stretch p-5"
         @dragenter="dragenter"
         @dragleave="dragleave"
         @dragover="dragover"
@@ -62,7 +62,7 @@
               @dragstart="exchange($event, index + 1, num * 2 - 1)"
               @drop="drop($event, index + 1, num * 2 - 1)"
               @dblclick="remove(index + 1, num * 2 - 1)"
-              :class="{ 'rotate-180 transform': seatCfg.visual == 'teacher' }"
+              :class="{ 'rotate-180 transform': seatCfg.visual == 'student' }"
               >{{ formatter(seatData[index + 1 + "_" + (num * 2 - 1)]) }}</span
             >
             <span
@@ -70,7 +70,7 @@
               @dragstart="exchange($event, index + 1, num * 2)"
               @drop="drop($event, index + 1, num * 2)"
               @dblclick="remove(index + 1, num * 2)"
-              :class="{ 'rotate-180 transform': seatCfg.visual == 'teacher' }"
+              :class="{ 'rotate-180 transform': seatCfg.visual == 'student' }"
               >{{ formatter(seatData[index + 1 + "_" + num * 2]) }}</span
             >
           </div>
@@ -88,7 +88,7 @@
           leading-8
           transform
         "
-        :class="{ 'rotate-180 transform': seatCfg.visual == 'teacher' }"
+        :class="{ 'rotate-180 transform': seatCfg.visual == 'student' }"
       >
         讲台
       </div>
@@ -104,7 +104,7 @@
           text-center text-white
           transform
         "
-        :class="{ 'rotate-180 transform': seatCfg.visual == 'teacher' }"
+        :class="{ 'rotate-180 transform': seatCfg.visual == 'student' }"
       >
         {{ info?.className }}座位表
       </div>
@@ -169,7 +169,7 @@ export default defineComponent({
     onMounted(() => {
       let rows = info.students.length / 8;
       let isInt = rows / 1 === 0;
-      tableRows.value = Math.floor(info.students.length / 8) + (isInt ? 2 : 1);
+      tableRows.value = Math.floor(info.students.length / 8) + (isInt ? 3 : 2);
     });
 
     let seatData = reactive(<Record<string, IStudent>>{});

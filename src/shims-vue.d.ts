@@ -8,7 +8,7 @@ declare module "nprogress";
 
 interface IStudent {
   name: string;
-  height: number;
+  height: number | "";
 }
 interface IInfo {
   className: string;
