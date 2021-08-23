@@ -7,6 +7,7 @@
     "jsx": "preserve",
     "sourceMap": true,
     "resolveJsonModule": true,
+    "skipLibCheck": true, //跳过第三方库的检验
     "esModuleInterop": true,
     "lib": ["esnext", "dom"]
   },

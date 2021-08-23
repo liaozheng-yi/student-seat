@@ -22,8 +22,12 @@ export default defineConfig({
       ],
     }),
   ],
+  base:'./',
   server: {
     open: true,
+  },
+  build:{
+    outDir:'build'
   },
   resolve: {
     alias: {

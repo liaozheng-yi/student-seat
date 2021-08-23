@@ -1,0 +1,9 @@
+{
+  "compilerOptions": {
+    "outDir": "../build",
+    "noEmit": false,
+    "module": "commonjs",
+    "baseUrl": ".",
+    "sourceMap": false
+  }
+}

@@ -1,14 +1,30 @@
 {
+  "build": {
+    "appId": "seatingTable",
+    "productName":"座位安排表",
+    "directories": {
+      "output": "software"
+    },
+    "files": [
+      "build/**/*",
+      "package.json"
+    ]
+  },
+  "main": "./build/main.js",
   "name": "seating-table",
   "version": "0.0.0",
+  "author": "廖政",
+  "description": "给崽崽的座位表",
   "scripts": {
     "dev": "vite",
     "build": "vue-tsc --noEmit && vite build",
-    "serve": "vite preview"
+    "serve": "vite preview",
+    "dist:all": "npm run build && cd electron && tsc && npm run electron",
+    "electron":"electron-builder --win --dir"
   },
   "dependencies": {
     "dom-to-image": "^2.6.0",
-    "element-plus": "^1.0.2-beta.69",
+    "element-plus": "^1.0.2-beta.71",
     "file-saver": "^2.0.5",
     "nprogress": "^0.2.0",
     "vue": "^3.0.5",
@@ -21,6 +37,8 @@
     "@vitejs/plugin-vue": "^1.2.5",
     "@vue/compiler-sfc": "^3.0.5",
     "autoprefixer": "^9.8.6",
+    "electron": "^13.2.1",
+    "electron-builder": "^22.11.7",
     "postcss": "^7.0.36",
     "postcss-nested": "^4.2.0",
     "tailwindcss": "npm:@tailwindcss/postcss7-compat@^2.2.7",
