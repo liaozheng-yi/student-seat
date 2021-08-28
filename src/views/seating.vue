@@ -1,7 +1,6 @@
 <template>
   <div class="flex">
     <div class="border-r-2 w-52 cfg-bar bg-purple-50">
-      <!-- <button @click="log(seatCfg)">用嘀嘀嗒嘀嗒</button> -->
       <p class="cfg-title">座位设计</p>
       <div class="p-3">
         <p class="mb-2">怎么看呢？</p>
@@ -17,20 +16,6 @@
             >学生视图</el-radio-button
           >
         </el-radio-group>
-        <!-- <p class="mb-2">分几组呢？</p>
-        <el-input-number
-          class="mb-3"
-          v-model="seatCfg.group"
-          :min="2"
-          :max="8"
-        />
-        <p class="mb-2">每组几列呢？</p>
-        <el-input-number
-          class="mb-3"
-          v-model="seatCfg.column"
-          :min="1"
-          :max="4"
-        /> -->
         <p class="mb-2">展示身高</p>
         <el-switch
           v-model="seatCfg.showHeight"
@@ -52,6 +37,7 @@
         @dragenter="dragenter"
         @dragleave="dragleave"
         @dragover="dragover"
+        @contextmenu.prevent=""
       >
         <div class="table-row" v-for="(item, index) in tableRows" :key="item">
           <div class="table-pair" v-for="num in 4" :key="num">
@@ -60,20 +46,22 @@
               2 3 4
               3 5 6
               4 7 8
-             -->
+            -->
+            <!-- @dblclick="remove(index + 1, num * 2 - 1)" -->
             <span
               draggable="true"
               @dragstart="exchange($event, index + 1, num * 2 - 1)"
               @drop="drop($event, index + 1, num * 2 - 1)"
-              @dblclick="remove(index + 1, num * 2 - 1)"
+              @mousedown="seatClick($event, index + 1, num * 2 - 1)"
               :class="{ 'rotate-180 transform': seatCfg.visual == 'student' }"
               >{{ formatter(seatData[index + 1 + "_" + (num * 2 - 1)]) }}</span
             >
+            <!-- @dblclick="remove(index + 1, num * 2)" -->
             <span
               draggable="true"
               @dragstart="exchange($event, index + 1, num * 2)"
               @drop="drop($event, index + 1, num * 2)"
-              @dblclick="remove(index + 1, num * 2)"
+              @mousedown="seatClick($event, index + 1, num * 2)"
               :class="{ 'rotate-180 transform': seatCfg.visual == 'student' }"
               >{{ formatter(seatData[index + 1 + "_" + num * 2]) }}</span
             >
@@ -142,6 +130,22 @@
       </ul>
     </div>
   </div>
+  <ul
+    class="
+      hidden
+      fixed
+      bg-pink-200
+      border-t border-l border-r border-purple-500
+      rounded
+      shadow-md
+    "
+    ref="MenuRef"
+    @contextmenu.prevent=""
+  >
+    <li class="menu-item">隐藏座位</li>
+    <li class="menu-item" @click="">移出学生</li>
+    <li class="menu-item">记为组长</li>
+  </ul>
 </template>
 <script lang="ts">
 import {
@@ -154,7 +158,7 @@ import {
   ref,
 } from "vue";
 import domtoimage from "dom-to-image";
-import { saveAs } from 'file-saver';
+import { saveAs } from "file-saver";
 export default defineComponent({
   setup() {
     let info = inject("info") as IInfo;
@@ -251,10 +255,22 @@ export default defineComponent({
       domtoimage
         .toBlob(document.getElementById("classroom"))
         .then(function (blob: string) {
-          saveAs(blob, `${ info?.className }座位表.jpg`);
+          saveAs(blob, `${info?.className}座位表.jpg`);
         });
     };
 
+    //鼠标点击事件
+    let MenuRef = ref(<HTMLUListElement>{});
+    const seatClick = (ev: MouseEvent, row: number, column: number) => {
+      if (ev.which == 3) {
+        console.log(ev);
+        let x = ev.clientX;
+        let y = ev.clientY;
+        MenuRef.value.style.left = x + 10 + "px";
+        MenuRef.value.style.top = y + "px";
+        MenuRef.value.style.display = "block";
+      }
+    };
     const log = (e: any, text?: any) => {
       console.log(e, text);
     };
@@ -274,6 +290,8 @@ export default defineComponent({
       exchange,
       visualChange,
       savePic,
+      seatClick,
+      MenuRef,
     };
   },
 });
@@ -284,6 +302,9 @@ export default defineComponent({
 }
 .cfg-title {
   @apply text-center text-xl text-white font-semibold leading-6 py-3 bg-gradient-to-r from-pink-300 to-purple-400;
+}
+.menu-item {
+  @apply cursor-pointer hover:bg-purple-400 border-b border-purple-500 p-1;
 }
 .el-text-base :deep(.el-radio-button__inner) {
   font-size: 14px;
