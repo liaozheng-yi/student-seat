@@ -4,11 +4,7 @@
       <p class="cfg-title">座位设计</p>
       <div class="p-3">
         <p class="mb-2">怎么看呢？</p>
-        <el-radio-group
-          v-model="seatCfg.visual"
-          class="mb-3"
-          @change="visualChange"
-        >
+        <el-radio-group v-model="seatCfg.visual" class="mb-3">
           <el-radio-button label="teacher" class="el-text-base"
             >教师视图</el-radio-button
           >
@@ -54,7 +50,11 @@
               @drop="drop($event, index + 1, num * 2 - 1)"
               @mousedown="seatClick($event, index + 1, num * 2 - 1)"
               :class="{ 'rotate-180 transform': seatCfg.visual == 'student' }"
-              >{{ formatter(seatData[index + 1 + "_" + (num * 2 - 1)]) }}</span
+            >
+              <!-- <span v-if="isShowLeader(index + 1, num * 2 - 1)">{{
+                seatData[index + 1 + "_" + (num * 2 - 1)].leader
+              }}</span> -->
+              {{ formatter(seatData[index + 1 + "_" + (num * 2 - 1)]) }}</span
             >
             <!-- @dblclick="remove(index + 1, num * 2)" -->
             <span
@@ -63,7 +63,11 @@
               @drop="drop($event, index + 1, num * 2)"
               @mousedown="seatClick($event, index + 1, num * 2)"
               :class="{ 'rotate-180 transform': seatCfg.visual == 'student' }"
-              >{{ formatter(seatData[index + 1 + "_" + num * 2]) }}</span
+            >
+              <!-- <span v-if="isShowLeader(index + 1, num * 2)">{{
+                seatData[index + 1 + "_" + num * 2].leader
+              }}</span> -->
+              {{ formatter(seatData[index + 1 + "_" + num * 2]) }}</span
             >
           </div>
         </div>
@@ -143,8 +147,11 @@
     @contextmenu.prevent=""
   >
     <li class="menu-item">隐藏座位</li>
-    <li class="menu-item" @click="">移出学生</li>
-    <li class="menu-item">记为组长</li>
+    <li class="menu-item" @click="remove()">移出学生</li>
+    <li class="menu-item" @click="setLeader('pink')">语文组长</li>
+    <li class="menu-item" @click="setLeader('green')">数学组长</li>
+    <li class="menu-item" @click="setLeader('yellow')">英语组长</li>
+    <li class="menu-item" @click="setLeader('blank')">取消组长</li>
   </ul>
 </template>
 <script lang="ts">
@@ -164,14 +171,8 @@ export default defineComponent({
     let info = inject("info") as IInfo;
     let seatCfg = reactive({
       visual: "teacher",
-      // group: 4,
-      // column: 2,
       showHeight: true,
     });
-    const visualChange = (e: "teacher" | "student") => {
-      console.log(e);
-      // if(e)
-    };
 
     //计算座位数目
     let tableRows = ref(<number>0);
@@ -181,7 +182,8 @@ export default defineComponent({
       tableRows.value = Math.floor(info.students.length / 8) + (isInt ? 3 : 2);
     });
 
-    let seatData = reactive(<Record<string, IStudent>>{});
+    //座位安排的json数据
+    let seatData = reactive(<Record<string, IStudent & { leader?: string }>>{});
     const dragstart = (e: DragEvent, data: IStudent, index: number) => {
       e.dataTransfer?.setData("student", JSON.stringify(data));
       e.dataTransfer?.setData("index", index.toString());
@@ -221,14 +223,6 @@ export default defineComponent({
       console.log(row, column);
       console.log(seatData);
     };
-    //移除座位
-    const remove = (row: number, column: number) => {
-      info.students.unshift(seatData[row + "_" + column]);
-      seatData[row + "_" + column] = {
-        name: "",
-        height: "",
-      } as unknown as IStudent;
-    };
     //交换座位
     const exchange = (e: DragEvent, row: number, column: number) => {
       console.log(seatData[row + "_" + column]);
@@ -249,6 +243,14 @@ export default defineComponent({
         }
       }
     };
+    //是否展示组长
+    const isShowLeader = (row: number, column: number): boolean => {
+      if (seatData[row + "_" + column]) {
+        return "leader" in seatData[row + "_" + column];
+      } else {
+        return false;
+      }
+    };
 
     //保存截图
     const savePic = () => {
@@ -261,15 +263,55 @@ export default defineComponent({
 
     //鼠标点击事件
     let MenuRef = ref(<HTMLUListElement>{});
+    let menuRow = ref(0);
+    let menuColumn = ref(0);
+    let evTarget: HTMLSpanElement;
     const seatClick = (ev: MouseEvent, row: number, column: number) => {
       if (ev.which == 3) {
         console.log(ev);
+        evTarget = ev.target as HTMLSpanElement;
         let x = ev.clientX;
         let y = ev.clientY;
         MenuRef.value.style.left = x + 10 + "px";
         MenuRef.value.style.top = y + "px";
         MenuRef.value.style.display = "block";
+        menuRow.value = row;
+        menuColumn.value = column;
       }
+    };
+    //移除座位
+    const remove = (
+      row: number = menuRow.value,
+      column: number = menuColumn.value
+    ) => {
+      info.students.unshift(seatData[row + "_" + column]);
+      seatData[row + "_" + column] = {
+        name: "",
+        height: "",
+      } as unknown as IStudent;
+      hideMenu();
+    };
+    //记为组长
+    const setLeader = (type: string) => {
+      // let find = seatData[menuRow.value + "_" + menuColumn.value];
+      // if (find) {
+      //   find.leader = type;
+      // }
+      console.log(evTarget, "target");
+      if (type !== "blank") {
+        evTarget.style.background = {
+          pink: "#fecaca",
+          green: "#c3f3e5",
+          yellow: "rgba(255,234,50,0.48)",
+        }[type] as string;
+      } else {
+        evTarget.style.background = "transparent";
+      }
+      hideMenu();
+    };
+    //隐藏右侧列表
+    const hideMenu = () => {
+      MenuRef.value.style.display = "none";
     };
     const log = (e: any, text?: any) => {
       console.log(e, text);
@@ -288,10 +330,11 @@ export default defineComponent({
       formatter,
       remove,
       exchange,
-      visualChange,
       savePic,
       seatClick,
       MenuRef,
+      setLeader,
+      isShowLeader,
     };
   },
 });
@@ -331,8 +374,8 @@ export default defineComponent({
     span {
       display: inline-block;
       user-select: none;
-      height: 60px;
-      line-height: 60px;
+      height: 59px;
+      line-height: 59px;
       text-align: center;
       width: 50%;
     }
