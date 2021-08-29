@@ -20,7 +20,16 @@
           class="mb-3"
         ></el-switch>
         <p class="mb-2">点我截图</p>
-        <el-button @click="savePic">保存哟</el-button>
+        <el-button @click="savePic" class="mb-3" type="primary"
+          >保存哟</el-button
+        >
+
+        <p class=" mb-2">返回首页</p>
+        <router-link
+          to="/"
+          class="bg-blue-400 text-white rounded-sm py-2 px-4 hover:bg-blue-300"
+          >go back</router-link
+        >
       </div>
     </div>
     <div
@@ -34,6 +43,7 @@
         @dragleave="dragleave"
         @dragover="dragover"
         @contextmenu.prevent=""
+        @click="cleanMenu"
       >
         <div class="table-row" v-for="(item, index) in tableRows" :key="item">
           <div class="table-pair" v-for="num in 4" :key="num">
@@ -43,7 +53,6 @@
               3 5 6
               4 7 8
             -->
-            <!-- @dblclick="remove(index + 1, num * 2 - 1)" -->
             <span
               draggable="true"
               @dragstart="exchange($event, index + 1, num * 2 - 1)"
@@ -51,12 +60,8 @@
               @mousedown="seatClick($event, index + 1, num * 2 - 1)"
               :class="{ 'rotate-180 transform': seatCfg.visual == 'student' }"
             >
-              <!-- <span v-if="isShowLeader(index + 1, num * 2 - 1)">{{
-                seatData[index + 1 + "_" + (num * 2 - 1)].leader
-              }}</span> -->
               {{ formatter(seatData[index + 1 + "_" + (num * 2 - 1)]) }}</span
             >
-            <!-- @dblclick="remove(index + 1, num * 2)" -->
             <span
               draggable="true"
               @dragstart="exchange($event, index + 1, num * 2)"
@@ -64,9 +69,6 @@
               @mousedown="seatClick($event, index + 1, num * 2)"
               :class="{ 'rotate-180 transform': seatCfg.visual == 'student' }"
             >
-              <!-- <span v-if="isShowLeader(index + 1, num * 2)">{{
-                seatData[index + 1 + "_" + num * 2].leader
-              }}</span> -->
               {{ formatter(seatData[index + 1 + "_" + num * 2]) }}</span
             >
           </div>
@@ -146,7 +148,8 @@
     ref="MenuRef"
     @contextmenu.prevent=""
   >
-    <li class="menu-item">隐藏座位</li>
+    <li class="menu-item" @click="hideSeat('0')">隐藏座位</li>
+    <li class="menu-item" @click="hideSeat('100')">显示座位</li>
     <li class="menu-item" @click="remove()">移出学生</li>
     <li class="menu-item" @click="setLeader('pink')">语文组长</li>
     <li class="menu-item" @click="setLeader('green')">数学组长</li>
@@ -243,14 +246,6 @@ export default defineComponent({
         }
       }
     };
-    //是否展示组长
-    const isShowLeader = (row: number, column: number): boolean => {
-      if (seatData[row + "_" + column]) {
-        return "leader" in seatData[row + "_" + column];
-      } else {
-        return false;
-      }
-    };
 
     //保存截图
     const savePic = () => {
@@ -284,19 +279,17 @@ export default defineComponent({
       row: number = menuRow.value,
       column: number = menuColumn.value
     ) => {
-      info.students.unshift(seatData[row + "_" + column]);
-      seatData[row + "_" + column] = {
-        name: "",
-        height: "",
-      } as unknown as IStudent;
+      if (seatData[row + "_" + column]) {
+        info.students.unshift(seatData[row + "_" + column]);
+        seatData[row + "_" + column] = {
+          name: "",
+          height: "",
+        } as unknown as IStudent;
+      }
       hideMenu();
     };
     //记为组长
     const setLeader = (type: string) => {
-      // let find = seatData[menuRow.value + "_" + menuColumn.value];
-      // if (find) {
-      //   find.leader = type;
-      // }
       console.log(evTarget, "target");
       if (type !== "blank") {
         evTarget.style.background = {
@@ -309,9 +302,20 @@ export default defineComponent({
       }
       hideMenu();
     };
+    //隐藏、显示座位
+    const hideSeat = (e: string) => {
+      evTarget.style.opacity = e;
+      hideMenu();
+    };
     //隐藏右侧列表
     const hideMenu = () => {
       MenuRef.value.style.display = "none";
+    };
+    //左键点击，取消列表按钮
+    const cleanMenu = () => {
+      if ((MenuRef.value.style.display = "block")) {
+        MenuRef.value.style.display = "none";
+      }
     };
     const log = (e: any, text?: any) => {
       console.log(e, text);
@@ -334,7 +338,8 @@ export default defineComponent({
       seatClick,
       MenuRef,
       setLeader,
-      isShowLeader,
+      hideSeat,
+      cleanMenu,
     };
   },
 });
@@ -366,7 +371,7 @@ export default defineComponent({
   justify-content: space-between;
   .table-pair {
     height: 61px;
-    border: 1px solid #000;
+    /* border: 1px solid #000; */
     width: 22%;
     margin-bottom: 16px;
     display: flex;
@@ -377,16 +382,21 @@ export default defineComponent({
       height: 59px;
       line-height: 59px;
       text-align: center;
+      border: 1px solid #000;
       width: 50%;
     }
+    span + span {
+      margin-left: 2px;
+      /* border-left: 0; */
+    }
   }
-  .table-pair::before {
+  /* .table-pair::before {
     content: "";
     width: 1px;
     height: 60px;
     background: #000;
     position: absolute;
     right: 50%;
-  }
+  } */
 }
 </style>
