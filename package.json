@@ -1,7 +1,7 @@
 {
   "build": {
     "appId": "seatingTable",
-    "productName":"座位安排表",
+    "productName": "座位安排表",
     "directories": {
       "output": "software"
     },
@@ -19,8 +19,9 @@
     "dev": "vite",
     "build": "vue-tsc --noEmit && vite build",
     "serve": "vite preview",
-    "dist:all": "npm run build && cd electron && tsc && npm run electron",
-    "electron":"electron-builder --win --dir"
+    "build:all": "npm run build && npm run tsc:electron && npm run electron",
+    "tsc:electron": "cd electron && tsc && cd ../",
+    "electron": "electron-builder --win --dir"
   },
   "dependencies": {
     "dom-to-image": "^2.6.0",
