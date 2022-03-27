@@ -67,6 +67,7 @@
         </button>
       </div>
     </div>
+    <a target="__blank" ref="nofollow" href="https://beian.miit.gov.cn/" class="absolute bottom-3">备案号：粤ICP备2021162378号</a>
   </div>
 </template>
 <script lang="ts">

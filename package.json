@@ -13,8 +13,7 @@
   "main": "./build/main.js",
   "name": "seating-table",
   "version": "0.0.0",
-  "author": "廖政",
-  "description": "给崽崽的座位表",
+  "author": "wenzheng",
   "scripts": {
     "dev": "vite",
     "build": "vue-tsc --noEmit && vite build",
